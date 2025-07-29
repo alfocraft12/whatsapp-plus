@@ -1,103 +1,57 @@
-import { join, dirname } from 'path';
-import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
-import { setupMaster, fork } from 'cluster';
-import { watchFile, unwatchFile } from 'fs';
-import cfonts from 'cfonts';
-import { createInterface } from 'readline';
-import yargs from 'yargs';
-import chalk from 'chalk';
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
+import chalk from 'chalk'
+import pino from 'pino'
+import config from './config.js'
+import plugins from './handler.js'
 
-// 🌐 Mensaje de inicio
-console.log('\n🔷 Iniciando WhatsApp Plus Bot 🔷\n');
+console.clear()
+console.log(chalk.blueBright(`\n🚀 ${config.botName} by ${config.ownerName}`))
+console.log(chalk.green('Iniciando...\n'))
 
-// 📂 Ruta del proyecto
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(__dirname);
-const { name, description, author, version } = require(join(__dirname, './package.json'));
-const { say } = cfonts;
+const startBot = async () => {
+  const { version } = await fetchLatestBaileysVersion()
+  const { state, saveCreds } = await useMultiFileAuthState('./session')
 
-// 📞 Interfaz de línea de comandos
-const rl = createInterface(process.stdin, process.stdout);
+  const sock = makeWASocket({
+    version,
+    printQRInTerminal: true, // Se puede quitar si usas pairing
+    auth: state,
+    logger: pino({ level: 'silent' })
+  })
 
-// 🎨 Consola personalizada
-say('WhatsApp\nPlus', {
-  font: 'block',
-  align: 'center',
-  colors: ['cyan', 'green']
-});
+  sock.ev.on('creds.update', saveCreds)
 
-say('Multi Device Ready', {
-  font: 'chrome',
-  align: 'center',
-  colors: ['blue']
-});
-
-say('Desarrollado por • Alfo', {
-  font: 'console',
-  align: 'center',
-  colors: ['green']
-});
-
-var isRunning = false;
-
-function start(file) {
-  if (isRunning) return;
-  isRunning = true;
-
-  let args = [join(__dirname, file), ...process.argv.slice(2)];
-
-  say([process.argv[0], ...args].join(' '), {
-    font: 'console',
-    align: 'center',
-    colors: ['green']
-  });
-
-  setupMaster({
-    exec: args[0],
-    args: args.slice(1),
-  });
-
-  let p = fork();
-
-  p.on('message', data => {
-    switch (data) {
-      case 'reset':
-        p.process.kill();
-        isRunning = false;
-        start.apply(this, arguments);
-        break;
-      case 'uptime':
-        p.send(process.uptime());
-        break;
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect } = update
+    if (connection === 'close') {
+      const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
+      console.log(chalk.redBright('\n❌ Conexión cerrada'), shouldReconnect ? '— Reintentando...' : '')
+      if (shouldReconnect) startBot()
+    } else if (connection === 'open') {
+      console.log(chalk.greenBright('\n✅ ¡Bot conectado correctamente!'))
     }
-  });
+  })
 
-  p.on('exit', (_, code) => {
-    isRunning = false;
-    console.error('🚩 Error:\n', code);
-    process.exit();
-    if (code === 0) return;
-    watchFile(args[0], () => {
-      unwatchFile(args[0]);
-      start(file);
-    });
-  });
+  sock.ev.on('messages.upsert', async ({ messages }) => {
+    const m = messages[0]
+    if (!m.message || m.key.fromMe) return
 
-  let opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-  if (!opts['test'])
-    if (!rl.listenerCount()) rl.on('line', line => {
-      p.emit('message', line.trim());
-    });
+    const msg = m.message.conversation || m.message.extendedTextMessage?.text || ''
+    const prefix = config.prefixes.find(p => msg.startsWith(p))
+    if (!prefix) return
+
+    const commandBody = msg.slice(prefix.length).trim().split(/\s+/)
+    const commandName = commandBody.shift().toLowerCase()
+
+    const plugin = plugins[commandName]
+    if (plugin) {
+      try {
+        await plugin.handler({ sock, m, commandBody })
+      } catch (err) {
+        console.log(chalk.redBright('❌ Error en el comando:'), err)
+      }
+    }
+  })
 }
 
-// ⚠️ Advertencia si se exceden los listeners
-process.on('warning', (warning) => {
-  if (warning.name === 'MaxListenersExceededWarning') {
-    console.warn('🚩 Se excedió el límite de Listeners en:');
-    console.warn(warning.stack);
-  }
-});
-
-// ▶️ Arranca el bot desde Xi_Crew.js
-start('Xi_Crew.js');
+startBot()

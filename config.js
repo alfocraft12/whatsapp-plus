@@ -1,8 +1,8 @@
 export default {
-  ownerNumber: '573146171942',
-  botName: 'Whatsapp plus',
-  ownerName: 'Alfo',
+  ownerNumber: 'NUMERO_DEL_PROPIETARIO',
+  botName: 'NOMBRE_DEL_BOT',
+  ownerName: 'NOMBRE_DEL_PROPIETARIO',
   prefixes: ['/', '.', '#', '>'],
-  logChannel: '👉 AQUÍ VA EL CANAL QUE TERMINA EN @newsletter 👈', // ← reemplaza esto después
+  logChannel: 'ID_DEL_CANAL@newsletter', // Reemplaza esto con el ID de tu canal de logs
   defaultTime: 10 // minutos por defecto para el tiempo de usuarios
 };

@@ -1,12 +1,14 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
+import baileys from '@whiskeysockets/baileys'
 import chalk from 'chalk'
 import pino from 'pino'
 import config from './config.js'
 import plugins from './handler.js'
 
 console.clear()
-console.log(chalk.blueBright(`\n🚀 ${config.botName} by ${config.ownerName}`))
+console.log(chalk.blueBright(`\n🚀 ${config.botName} por ${config.ownerName}`))
 console.log(chalk.green('Iniciando...\n'))
+
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = baileys
 
 const startBot = async () => {
   const { version } = await fetchLatestBaileysVersion()
@@ -14,15 +16,20 @@ const startBot = async () => {
 
   const sock = makeWASocket({
     version,
-    printQRInTerminal: true, // Se puede quitar si usas pairing
+    printQRInTerminal: true,
     auth: state,
     logger: pino({ level: 'silent' })
   })
 
   sock.ev.on('creds.update', saveCreds)
 
-  sock.ev.on('connection.update', (update) => {
-    const { connection, lastDisconnect } = update
+  sock.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect, qr } = update
+
+    if (qr) {
+      console.log(chalk.cyan('⚡ Escanea el código QR para conectar el bot.'))
+    }
+
     if (connection === 'close') {
       const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
       console.log(chalk.redBright('\n❌ Conexión cerrada'), shouldReconnect ? '— Reintentando...' : '')

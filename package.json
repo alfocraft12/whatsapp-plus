@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js"
   },
-  "author": "Tu Nombre",
+  "author": "alfocraft 12 & chat GPT",
   "license": "ISC",
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.0",

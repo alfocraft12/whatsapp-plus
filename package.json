@@ -1,20 +1,17 @@
-{
-  "name": "whatsapp-plus-bot",
+"name": "whatsapp-plus",
   "version": "1.0.0",
-  "description": "Bot de WhatsApp con funciones exclusivas administradas por Alfo",
+  "description": "Bot avanzado estilo Whatsapp Plus",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js"
   },
-  "author": "Alfo",
-  "license": "MIT",
+  "keywords": [],
+  "author": "Alfo & ChatGPT",
+  "license": "ISC",
   "dependencies": {
-    "@hapi/boom": "^10.0.1",
-    "@whiskeysockets/baileys": "^6.5.0",
-    "cfonts": "^3.1.0",
+    "@whiskeysockets/baileys": "^6.7.0",
     "chalk": "^5.3.0",
-    "pino": "^8.14.1",
-    "yargs": "^17.7.2"
+    "pino": "^8.0.0"
   }
 }

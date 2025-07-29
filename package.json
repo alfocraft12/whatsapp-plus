@@ -1,17 +1,16 @@
 {
-  "name": "whatsapp-plus",
-  "version": "1.0.0",
-  "description": "Bot avanzado estilo Whatsapp Plus",
+  "name": "whatsapp-plus-bot",
+  "version": "2.0.0",
+  "description": "Bot de WhatsApp personalizable",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [],
-  "author": "Alfo & ChatGPT",
+  "author": "Tu Nombre",
   "license": "ISC",
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.18",
+    "@whiskeysockets/baileys": "^6.7.0",
     "chalk": "^5.3.0",
     "pino": "^8.0.0"
   }

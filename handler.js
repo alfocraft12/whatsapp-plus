@@ -3,7 +3,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const folders = ['plugins', 'plugins_admin']
+const folders = ['plugins']
 const plugins = {}
 
 for (const folder of folders) {
@@ -17,4 +17,3 @@ for (const folder of folders) {
 }
 
 export default plugins
-

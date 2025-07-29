@@ -1,4 +1,5 @@
-"name": "whatsapp-plus",
+{
+  "name": "whatsapp-plus",
   "version": "1.0.0",
   "description": "Bot avanzado estilo Whatsapp Plus",
   "main": "index.js",

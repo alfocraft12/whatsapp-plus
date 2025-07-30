@@ -1,20 +1,19 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
+import { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
+import makeWASocket from '@whiskeysockets/baileys/lib/Socket'
 import chalk from 'chalk'
 import pino from 'pino'
 import config from './config.js'
 import plugins from './handler.js'
 
 console.clear()
-console.log(chalk.blueBright(`\n🚀 ${config.botName} by ${config.ownerName}`))
+console.log(chalk.blueBright(`\n🚀 ${config.botName} por ${config.ownerName}`))
 console.log(chalk.green('Iniciando...\n'))
 
 const startBot = async () => {
-  const { version } = await fetchLatestBaileysVersion()
   const { state, saveCreds } = await useMultiFileAuthState('./session')
 
   const sock = makeWASocket({
-    version,
-    printQRInTerminal: true, // Se puede quitar si usas pairing
+    printQRInTerminal: true,
     auth: state,
     logger: pino({ level: 'silent' })
   })
